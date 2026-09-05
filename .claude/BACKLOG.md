@@ -2984,7 +2984,7 @@ no controle pré-edição; `bash .claude/verify/compliance-audit.sh` — **17 PA
 `BACKLOG.md` (`gen_pins.py`) é do orquestrador, em commit próprio; até ele o
 stage `baseline` acusa os dois.
 
-## EA-41 — `.claude/BACKLOG.md:2029` carrega dois bytes NUL literais: o registro sai da normalização de texto que ele mesmo vigia (R7 §1)
+## EA-41 — `.claude/BACKLOG.md:2041` carrega dois bytes NUL literais: o registro sai da normalização de texto que ele mesmo vigia (R7 §1)
 
 **Status**: `aberto`
 
@@ -2994,8 +2994,9 @@ pelo `doc-writer`.
 
 ### Cadeia arquivo:linha → efeito
 
-- **`.claude/BACKLOG.md:2029`** (medido em `HEAD` desta worktree e idêntico em
-  `origin/develop`) contém **dois bytes `0x00` literais** dentro da string
+- **`.claude/BACKLOG.md:2041`** (medido nesta árvore após o merge de
+  `origin/develop`; **`:2029`** em `origin/develop`, ver a nota de citação
+  abaixo) contém **dois bytes `0x00` literais** dentro da string
   ``ctxChave(d) + "<NUL>" + d.seletor + "<NUL>" + d.prop`` — hexdump da linha:
   `... 22 00 22 20 2b 20 ... 22 00 22 20 2b ...` (aspas · NUL · aspas, duas
   vezes). A intenção do texto é citar o separador de string do código-fonte
@@ -3004,7 +3005,7 @@ pelo `doc-writer`.
   letras `\x00`; o que foi gravado foi o byte em si, não o escape.
 - **Origem**: entrou no commit `5729961` ("doc(014): EA-34 — limite do
   instrumento de regra morta…"), na linha 1435 daquela versão do arquivo
-  (1489 linhas então; o arquivo cresceu para os 2029 linhas de hoje) — já
+  (1489 linhas então; o arquivo tem 3072 linhas nesta árvore) — já
   presente no próprio diff do commit (linha 48 do patch). Confirmado bit a bit
   igual em `origin/develop` (`git fetch origin develop`, mesma posição
   relativa do trecho).
@@ -3024,6 +3025,30 @@ pelo `doc-writer`.
   saber a causa. `git diff` permanece textual só pela heurística dos
   primeiros ~8000 bytes, o que **esconde** a classificação binária em vez de
   expô-la.
+
+### Nota de citação (2026-09-05) — a linha citada apodreceu dentro do próprio commit que a escreveu
+
+A primeira redação deste achado citava **`:2029`**, e estava **certa contra a
+árvore medida**: no commit `7ee85a0` (pai do commit que escreveu esta entrada)
+o byte NUL está na linha 2029, conferido. O commit `ecdb4ee` — **este** —
+inseriu prosa acima daquele ponto e empurrou o byte para **2041**: a citação
+nasceu obsoleta no ato de nascer. Medição da trilha inteira:
+
+| ref | total de linhas | NUL na linha |
+|---|---|---|
+| `5729961` (origem) | 1489 | 1435 |
+| `7ee85a0` (árvore medida pelo QA) | 2902 | **2029** |
+| `ecdb4ee` (o commit desta entrada) | 2976 | **2041** |
+| `origin/develop` (com o PR #44) | 2851 | 2029 |
+| esta árvore, pós-merge e pós-nota | 3072 | **2041** |
+
+Isto é a **quinta instância** da família `EA-31`, e a mais curta: a distância
+entre citação correta e citação falsa foi **um commit**, o próprio. Reforça
+a tese do `EA-31` sem depender de tempo decorrido: número de linha em documento
+que cresce não é endereço estável. **A âncora que não apodrece é o conteúdo**
+— a string ``ctxChave(d) + "⟨NUL⟩" + d.seletor``, citada acima, localiza o
+defeito em qualquer versão do arquivo; o número é conforto de leitura, não
+endereço. Quem consertar o `EA-41` **mede antes**, não confia no número daqui.
 
 ### Escopo — só este arquivo (pergunta respondida)
 
